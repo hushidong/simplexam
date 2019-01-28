@@ -1,0 +1,114 @@
+\documentclass[answer=true,countunit=chapter,papersize=A4,paperprint=double,scoretable]{simplexam}
+
+\begin{document}
+
+\begin{center}
+\zihao{-3}\heiti  2018年火星高等学校招生统一考试\\ %
+\zihao{4}    文理综合 %
+\end{center}
+
+%{\bfseries \heiti 注意事项}：
+%\begin{enumerate}
+%\item 作弊请不要被老师发现。
+%\item 一旦被发现作弊，不要试图以空口求情或小恩小惠来逃避处罚。
+%\item “每个人都有一个他无法拒绝的价格。”
+%\end{enumerate}
+
+\iftoggle{auxinfoused}{\assesstaball}{}
+
+\chapter{判断题：本大题共4小题，每小题5分，共20分。判断下列各题，正确的在题后括号内打\ding{52}，错的打\ding{56}。}
+
+\includequestions{questionliba}%[random=3]
+
+%测试answer的换行
+\begin{question}
+尼采说道：“世上只有一个基督徒，他已经死了”，这句话中所说的“他”是指彼得吗？
+你好好好 \answer{wrong}
+\end{question}
+
+\chapter{选择题：本大题共4小题，每小题10分，共40分。在每小题给出的四个选项中，只有一项是符合题目要求的。}
+
+\includequestions[random=3]{questionlibb}%[random=3]
+
+
+\chapter{填空题：本题共4小题，每小题5分，共20分。}
+
+%测试blank命令中中文字符和数学字符连在一起时可能出现错误
+\begin{question}
+真空中无线电磁波传播速度为\answerblank{光速或 $3*10^8$m/s}。	
+\end{question}
+
+
+\includequestions[random=3]{questionlibc}%[random=3]
+
+
+\chapter{简答题。}
+
+
+\includequestions[random=3]{questionlibd}%
+
+
+\chapter{填字题：本题共4小题，每小题5分，共20分。}
+
+%如果要增加汉字之间的间距，可以设置CJKglue，但必须要在字号命令改变命令之后设置
+\begin{question}
+请根据拼音把句中的汉字填写出来。\vskip 1em
+
+\Large
+\xeCJKsetup{
+    CJKglue = {\hskip 0.2em plus .1em}
+}
+
+段落中的\answerhanzi{拼音}文字	\answerpoints
+\end{question}
+
+%对比上一题可以看到，先设glue后设字号，无法增加汉字间距
+\begin{question}
+请根据米字格中汉字把拼音填写出来。\vskip 1em
+
+\xeCJKsetup{
+    CJKglue = {\hskip 0.2em plus .1em}
+}
+
+\Large
+
+段落中的\answerpinyin{拼音}文字	\answerpoints
+\end{question}
+
+
+\begin{question}
+请根据拼音把下面的唐诗填写出来。\vskip 1em
+
+\centering
+\huge
+
+\answerhanzi{春晓}
+
+\Large
+
+\answerhanzi{孟浩然}
+
+\answerhanzi{春眠不觉晓}，\answerhanzi{处处闻啼鸟}。
+
+\answerhanzi{夜来风雨声}，\answerhanzi{花落知多少}。
+
+\answerpoints
+\end{question}
+
+
+\chapter{作文题。阅读下面黑格尔《历史哲学》中的一段话，思考并提出你对这段话的理解话的理解}
+
+\SetupExSheets{
+    headings ={runin-nonumber},
+}
+
+\begin{question}
+\begin{quotation}
+  \large \kaishu 经验或曰历史给我们的教训却是，人民和政府从来就没有从历史学到任何东西，从未依照本应从从历史中抽绎出来的教训行事。每个时代都有它特殊的处境，都具有一种个别的情况，使它的举动行事，不得不全由自己来考虑、自己来解决。当重大事件纷乘交迫的时候，一般笼统的信条毫无裨益。回忆过去的同样情形，也是徒劳无功的。一个灰色的回忆不能抗衡``现在''的生动和自由。
+\end{quotation}
+\answerpoints
+\end{question}
+
+\drawcomposition[0.7]{20}{13}
+%
+\end{document}
