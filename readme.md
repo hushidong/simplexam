@@ -1,6 +1,6 @@
 <b>Date of last change: 2019-01-25 to version v1.0a</b>
 
-# һ�����Ծ��ĵ��� simplexam
+# 一个简单试卷文档类 simplexam
 
 ---------------------------------------------------------------
 
@@ -13,127 +13,129 @@ Released under the LaTeX Project Public License v1.3c or later
 ---------------------------------------------------------------
    
 
-## ����
+## 介绍
 
-һ���򵥵��Ծ�ģ���� simplexam���Ծ����д𰸺��޴�����ģʽ��ʹ��ѡ�� answer ���ơ�
-���������ͳ�Ʊ�ʱ��answerѡ��Ҳ����ʵ�ʵ÷�ͳ�ƣ�����ӡ��ʱ����÷�ͳ�ƣ����������
-�Ծ������⻮�ֱ��ʹ��chapter��section�������ĵ��½����Ĭ��ʹ��section�����Ҫʹ��chapter����������countunit=chapter
+一个简单的试卷模板类 simplexam。试卷分有答案和无答案两种模式，使用选项 `answer` 控制。
+当输出分数统计表时，`answer`选项也控制实际得分统计，当打印答案时输出得分统计，否则不输出。
+试卷各大题划分标记使用`chapter`，`section`等正常文档章节命令。默认使用`section`，如果要使用`chapter`，则需设置`countunit=chapter`
 
-�Ծ�������Ŀȫ����question��������������һ����ѡ�ı�ѡ����������Ŀ���÷�ֵ����������ʹ��Ĭ�ϵķ�ֵ�����磺
+**试卷题目**全部用`question`环境，可以利用一个可选的必选参数给该题目设置分值，不给出则使用默认的分值。比如：
 ```
 \begin{question}{5}
 question contents
 \end{question}
 ```
 
-�ж������\answer{right}��\answer{wrong}��ʾ�Ժʹ������Դ���ѡ������ʾʵ�ʵ÷ֱ���\answer[1]{right}
+**判断题答案**用`\answer{right}`和`\answer{wrong}`表示对和错。可以带可选参数表示实际得分比如`\answer[1]{right}`
 
-ѡ�������\answer{ѡ��ѡ��}��ʾ��ѡ�е�ѡ������������������Դ���ѡ������ʾʵ�ʵ÷ֱ���\answer[1]{A}��ѡ����ѡ�������tasks�������ã�Ҳ����ͨ��options�������á����磺
+**选择题答案**用`\answer{选择选项}`表示，选中的选项可以任意数量。可以带可选参数表示实际得分比如`\answer[1]{A}`。选择题选项可以用`tasks`环境设置，也可以通过`\options`命令设置。比如：
 ```
   \begin{tasks}(4)
-    \task �����Ȼ����
-	\task ��Ч����
-	\task һ�¹���
+    \task 最大似然估计
+	\task 有效估计
+	\task 一致估计
   \end{tasks}
 ```
-��
+或
 ```
-\options[3]{�����Ȼ����}
-	{��Ч����}
-	{һ�¹���}
+\options[3]{最大似然估计}
+	{有效估计}
+	{一致估计}
 ```
-���У�tasks������(4)��ָ��һ���з���ѡ�����������options����������[3]��ָ��ѡ��ĸ�����һ���е��������Զ�������
+其中：`tasks`环境中(4)是指定一行中放置选项的栏数，而`\options`命令后面给出[3]是指定选项的个数，一行中的栏数则自动调整，
 
-��������\answerblank{������}��ʾ�����Դ���ѡ������ʾʵ�ʵ÷ֱ���\answerblank[2]{A}
+**填空题答案**用`\answerblank{答案内容}`表示。可以带可选参数表示实际得分比如`\answerblank[2]{A}`
 
-�����������\answerhanzi{��������}��ʾ�𰸡�ƴ���������\answerpinyin{��������}��ʾ�𰸡�
-����\answerhanzi��\answerpinyin����Ƚϸ��ӣ�һ�����п��ܳ��ֶ������˲�����ѡ������ʾ�÷֡�
-������Ŀ�����÷�ֱ��������\answerpoints[3]������
+**汉字填空题**用`\answerhanzi{汉字内容}`表示答案。
 
-�������solution������ʾ������÷���һ���������ŵĿ�ѡ������ʾ������:
+**拼音填空题**用`\answerpinyin{汉字内容}`表示答案。
+
+由于`\answerhanzi`和`\answerpinyin`命令比较复杂，一个题中可能出现多个，因此不带可选参数表示得分。这类题目给出得分直接用命令`\answerpoints[3]`给出。
+
+**简答/证明题答案**用`solution`环境表示。简答题得分用一个带花括号的可选参数表示，比如:
 ```
 \begin{solution}{5}
 answer contents
 \end{solution}
 ```
 
-simplexam ����Ҫ���������º��:
-latex3 kernel��etoolbox��ctex��xpinyin��amsmath��unicode-math��titlesec��exsheets��tasks��
-tikz��xcolor��ccaption��subfigure��mwe
+simplexam 类主要依赖于如下宏包:
+latex3 kernel，etoolbox，ctex，xpinyin，amsmath，unicode-math，titlesec，exsheets，tasks，
+tikz，xcolor，ccaption，subfigure，mwe
 
-����ʵ�ֲο���:
-sd44 �� danexam��
-Jianrui Lyu �� jnuexam��
-htharoldht �� USTBExam��
-Charles Bao �� BHCexam
-���ܶ��� CMC �ȡ�
-���ڿ��ٹ���ʵ�ֿ��ǣ����ִ���ֱ�ӽ��ã������л!
+代码实现参考了:
+sd44 的 danexam、
+Jianrui Lyu 的 jnuexam、
+htharoldht 的 USTBExam、
+Charles Bao 的 BHCexam
+唐绍东的 CMC 等。
+出于快速功能实现考虑，部分代码直接借用，深表感谢!
 
-## ѡ��˵����
+## 选项说明：
 
-* answer ��ӡ�Ծ���
+* `answer` 打印试卷答案
 
-	answer=true��answer�����ӡ�𰸣�
+	`answer=true`或`answer`，则打印答案；
 	
-	answer=false���򲻴�ӡ��
+	`answer=false`，则不打印答案
 	
-* countunit ����С��ļ����������֣�
-	countunit=chapter��������Ÿ���chapter���м���
+* `countunit` 设置小题的计数关联划分：
+	`countunit=chapter`，题名序号根据chapter进行计数
 	
-	countunit=section��countunit��������Ÿ���section���м���
+	`countunit=section`或`countunit`，题名序号根据section进行计数
 	
-	countunit=none���������ȫ��ͳһ����
+	`countunit=none`，题名序号全文统一计数
 	
-* sheetsize �����Ծ���ֽ�Ŵ�С
+* `sheetsize` 设置试卷的纸张大小
 
-	sheetsize=A4��sheetsize���Ծ�ֽ��ΪA4
+	`sheetsize=A4`或`sheetsize`，试卷纸张为A4
 	
-	sheetsize=A3���Ծ�ֽ��ΪA3
+	`sheetsize=A3`，试卷纸张为A3
 	
-* paperprint �����Ծ��Ƿ�˫���ӡ
+* `paperprint` 设置试卷是否双面打印
 
-	paperprint=double��paperprint���Ծ�ֽ��˫���ӡ
+	`paperprint=double`或`paperprint`，试卷纸张双面打印
 	
-	paperprint=single���Ծ�ֽ�ŵ����ӡ
+	`paperprint=single`，试卷纸张单面打印
 	
-* scoretable �����Ƿ��������ͳ�Ʊ�/���ֱ�
+* `scoretable` 设置是否输出分数统计表/评分表
 
-	scoretable=true��scoretable���������ͳ�Ʊ�
+	`scoretable=true`或`scoretable`，输出分数统计表
 	
-	scoretable=false�����������ͳ�Ʊ�
+	`scoretable=false`，不输出分数统计表
 
-## ��Ҫ�ص�
+## 主要特点
 
-* �����ѡ�����
-* ֽ�Ŵ�С��ѡ�����
-* ��˫���ӡ��ͬ����(����ֽ�ź��ܷ���)��ѡ�����
-* ���ⵥԪ��ͬ���õ�ѡ�����
-* ��Ŀ��������ѡ��
-* �Զ��Ĵ����ȫ�ּƷֱ�(��ֵ�͵÷ֵķ���)
-* ��Ŀ��ʽ�ֲ�������
-* �򻯵��������ƴ����
-* �Զ���ҳüҳ�źͲݸ�ҳ
-* ѡ����ѡ���������tasks�ֶ�����Ҳ������options�����Զ�����
-* ����ӡ��ʱ�Զ������ʵ��հ��Ա���д��
+* 答案输出选项控制
+* 纸张大小的选项控制
+* 单双面打印不同设置(包括纸张和密封线)的选项控制
+* 大题单元不同设置的选项控制
+* 题目从题库随机选择
+* 自动的大题和全局计分表(分值和得分的分离)
+* 题目格式局部可设置
+* 简化的填字题和拼音题
+* 自动的页眉页脚和草稿页
+* 选择题选项可以利用tasks手动给出也可以用options命令自动设置
+* 不打印答案时自动留出适当空白以便填写答案
 
 
-## �÷�
+## 用法
 
-* ��Ϊ�ĵ�������
-* ����ֱ����center��������
-* ���ⷽ���ο�ʾ���Ծ�
-* ����ҳ�����Ԫ�ذ���༭
-* �����������ѧ���尴������
-* ����xelatex����
+* 作为文档类引入
+* 标题直接用center环境输入
+* 出题方法参考示例试卷
+* 其它页面可视元素按需编辑
+* 正文字体和数学字体按需设置
+* 采用xelatex编译
 
 
 ## need to do
 
-* ֮ǰ���ڹ���ʵ�ֿ��ǣ����ִ���δ��latex3ʵ�֣����ڿ�������exsheets��task��ȫ��latex3ʵ�֡�
-* һЩϸ�����д����ơ�
-* ���Ӹ����ѡ�����
+* 之前出于功能实现考虑，部分代码未用latex3实现，后期考虑类似exsheets和task完全用latex3实现。
+* 一些细节仍有待完善。
+* 增加更多的选项控制
 
 
-# ������ʷ
+# 更新历史
 * 2018-12-01 to version v1.0
 * 2019-01-25 to version v1.0a
