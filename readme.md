@@ -19,7 +19,7 @@ Released under the LaTeX Project Public License v1.3c or later
 当输出分数统计表时，answer选项也控制实际得分统计，当打印答案时输出得分统计，否则不输出。
 试卷各大题划分标记使用chapter，section等正常文档章节命令。默认使用section，如果要使用chapter，则需设置countunit=chapter
 
-试卷各个题目全部用question环境，可以利用一个可选的必选参数给该题目设置分值，比如：
+试卷各个题目全部用question环境，可以利用一个可选的必选参数给该题目设置分值，不给出则使用默认的分值。比如：
 ```
 \begin{question}{5}
 question contents
@@ -27,6 +27,7 @@ question contents
 ```
 
 判断题答案用\answer{right}和\answer{wrong}表示对和错。可以带可选参数表示实际得分比如\answer[1]{right}
+
 选择题答案用\answer{选择选项}表示，选中的选项可以任意数量。可以带可选参数表示实际得分比如\answer[1]{A}。选择题选项可以用tasks环境设置，也可以通过options命令设置。比如：
 ```
   \begin{tasks}(4)
@@ -44,9 +45,11 @@ question contents
 其中：tasks环境中(4)是指定一行中放置选项的栏数，而options命令后面给出[3]是指定选项的个数，一行中的栏数则自动调整，
 
 填空题答案用\answerblank{答案内容}表示。可以带可选参数表示实际得分比如\answerblank[2]{A}
+
 汉字填空题用\answerhanzi{汉字内容}表示答案。拼音填空题用\answerpinyin{汉字内容}表示答案。
 由于\answerhanzi和\answerpinyin命令比较复杂，一个题中可能出现多个，因此不带可选参数表示得分。
-这个题目给出分数用命令\answerpoints[3]给出。
+这类题目给出得分直接用命令\answerpoints[3]给出。
+
 简单题答案用solution环境表示。简单题得分用一个带花括号的可选参数表示，比如:
 ```
 \begin{solution}{5}
@@ -69,20 +72,34 @@ Charles Bao 的 BHCexam
 ## 选项说明：
 
 * answer 打印试卷答案
+
 	answer=true或answer，则打印答案；
+	
 	answer=false，则不打印答案
+	
 * countunit 设置小题的计数关联划分：
 	countunit=chapter，题名序号根据chapter进行计数
+	
 	countunit=section或countunit，题名序号根据section进行计数
+	
 	countunit=none，题名序号全文统一计数
+	
 * sheetsize 设置试卷的纸张大小
+
 	sheetsize=A4或sheetsize，试卷纸张为A4
+	
 	sheetsize=A3，试卷纸张为A3
+	
 * paperprint 设置试卷是否双面打印
+
 	paperprint=double或paperprint，试卷纸张双面打印
+	
 	paperprint=single，试卷纸张单面打印
+	
 * scoretable 设置是否输出分数统计表/评分表
+
 	scoretable=true或scoretable，输出分数统计表
+	
 	scoretable=false，不输出分数统计表
 
 ## 主要特点
@@ -114,6 +131,7 @@ Charles Bao 的 BHCexam
 
 * 之前出于功能实现考虑，部分代码未用latex3实现，后期考虑类似exsheets和task完全用latex3实现。
 * 一些细节仍有待完善。
+* 增加更多的选项控制
 
 
 # 更新历史
