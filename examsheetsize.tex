@@ -1,4 +1,4 @@
-\documentclass[answer,countunit=section,sheetsize=A3,paperprint=double,scoretable]{simplexam}
+\documentclass[answer=true,countunit=section,paperprint,sheetsize,scoretable]{simplexam}
 
 \begin{document}
 
@@ -18,12 +18,9 @@
 
 \section{判断题：本大题共4小题，每小题5分，共20分。判断下列各题，正确的在题后括号内打\ding{52}，错的打\ding{56}。}
 
-%测试内容：
-%测试answer的换行
-
 \includequestions{questionliba}%[random=3]
 
-
+%测试answer的换行
 \begin{question}
 尼采说道：“世上只有一个基督徒，他已经死了”，这句话中所说的“他”是指彼得吗？
 你好好好 \answer{wrong}
@@ -31,31 +28,22 @@
 
 \section{选择题：本大题共4小题，每小题10分，共40分。在每小题给出的四个选项中，只有一项是符合题目要求的。}
 
-%测试内容：
-%测试answer的换行，\answer前面的字符如果是英文标点可以使\answer{B}放到行末
-%如果\answer前面的字符是中文字符，则可能因为ctex产生空格使得中间会断行，
-%则answer无法放到行末吗，而前面的判断中的测试题的表现说明中文字符也可以使放到行末。
-
 \includequestions[random=3]{questionlibb}%[random=3]
 
 
 \section{填空题：本题共4小题，每小题5分，共20分。}
 
-%测试内容：
 %测试blank命令中中文字符和数学字符连在一起时可能出现错误
-%测试答案很长换行的情况
-
 \begin{question}
 真空中无线电磁波传播速度为\answerblank{光速或 $3*10^8$m/s}。	
 \end{question}
+
 
 \includequestions[random=3]{questionlibc}%[random=3]
 
 
 \section{简答题。}
 
-%测试内容：
-%测试solution不打印时输出空行
 
 \includequestions[random=3]{questionlibd}%
 

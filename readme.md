@@ -15,10 +15,10 @@ Released under the LaTeX Project Public License v1.3c or later
 
 ## 介绍
 
-一个简单的试卷模板类 simplexam。试卷分有答案和无答案两种模式。使用选项 answer 控制。
-不给出该选项或者设置answer=false则不打印答案，给出该选项answer或者answer=true则打印答案。
+一个简单的试卷模板类 simplexam。试卷分有答案和无答案两种模式，使用选项 answer 控制。
+当输出分数统计表时，answer选项也控制实际得分统计，当打印答案时输出得分统计，否则不输出。
+试卷各大题划分标记使用chapter，section等正常文档章节命令。默认使用section，如果要使用chapter，则需设置countunit=chapter
 
-试卷各类题目描述用section命令
 试卷各个题目全部用question环境，可以利用一个可选的必选参数给该题目设置分值，比如：
 ```
 \begin{question}{5}
@@ -65,6 +65,25 @@ htharoldht 的 USTBExam、
 Charles Bao 的 BHCexam
 唐绍东的 CMC 等。
 出于快速功能实现考虑，部分代码直接借用，深表感谢!
+
+## 选项说明：
+
+* answer 打印试卷答案
+	answer=true或answer，则打印答案；
+	answer=false，则不打印答案
+* countunit 设置小题的计数关联划分：
+	countunit=chapter，题名序号根据chapter进行计数
+	countunit=section或countunit，题名序号根据section进行计数
+	countunit=none，题名序号全文统一计数
+* sheetsize 设置试卷的纸张大小
+	sheetsize=A4或sheetsize，试卷纸张为A4
+	sheetsize=A3，试卷纸张为A3
+* paperprint 设置试卷是否双面打印
+	paperprint=double或paperprint，试卷纸张双面打印
+	paperprint=single，试卷纸张单面打印
+* scoretable 设置是否输出分数统计表/评分表
+	scoretable=true或scoretable，输出分数统计表
+	scoretable=false，不输出分数统计表
 
 ## 主要特点
 

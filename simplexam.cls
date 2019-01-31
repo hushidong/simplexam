@@ -13,9 +13,11 @@
 \NeedsTeXFormat{LaTeX2e}
 \RequirePackage{expl3}
 \ProvidesExplClass {simplexam} {2018/03/11} {v1.0} {a simple exam}%同时开启latex3语法
-\RequirePackage{ xparse, xtemplate, l3keys2e ,etoolbox}
+\RequirePackage{ xparse,xtemplate,l3keys2e,etoolbox}
 
 \xdef\unitname{section}
+\xdef\paperprintname{double}
+\xdef\papersizename{A4}
 \bool_new:N   \l__simplexam_prtanswer_bool  %判断打印答案用的boolean
 \bool_new:N   \l__simplexam_scoretab_bool  %判断打印得分表用的boolean
 
@@ -27,19 +29,26 @@
     answer .bool_set:N = \l__simplexam_prtanswer_bool, %选项answer用来设置boolean
     answer .default:n = true, %默认设置值为true
     answer .value_required:n = false, %可以不给出设置值
+
     countunit .code:n = {\xdef\unitname{#1}}, %定义大题单元所依赖的划分，是section还是chapter还是none
     countunit .default:n = section, %默认设置值为section
     countunit .value_required:n = false,%可以不给出设置值
-    papersize .code:n ={\xdef\papersizename{#1}},%纸张大小
-    papersize .default:n = {A4},%默认设置值为A4,A3
-    papersize .value_required:n = false,%可以不给出设置值
-    paperprint .code:n ={\xdef\paperprintname{#1}},%纸张大小
+
+    paperprint .code:n ={\xdef\paperprintname{#1}},%双面打印
     paperprint .default:n = {double}, %默认设置值为double，single
     paperprint .value_required:n = false, %可以不给出设置值
+
     scoretable .bool_set:N = \l__simplexam_scoretab_bool, %选项answer用来设置boolean
     scoretable .default:n = true, %默认设置值为true
     scoretable .value_required:n = false, %可以不给出设置值
+
+    sheetsize.code:n ={\xdef\papersizename{#1}},%纸张大小，用sheet而不是paper，因为paper和papersize两个选项geometry宏包已经用了。
+                                                                         %若使用paper和papersize会报选项错误。
+    sheetsize.default:n = {A4}, %默认设置值为A4,A3
+    sheetsize.value_required:n = false, %可以不给出设置值
+
   }
+
 \ProcessKeysOptions { simplexam }
 
 \ifcsstring{unitname}{chapter}%当以章为单位时，采用book类。
@@ -59,14 +68,14 @@
   }
 
 
-\ifcsstring{papersizename}{A3}
+\ifcsstring{papersizename}{A4}
+{\ifcsstring{paperprintname}{double}
+    {\geometry{a4paper,twoside,left=30mm,right=20mm,top=25mm,bottom=25mm}}
+    {\geometry{a4paper,left=30mm,right=20mm,top=25mm,bottom=25mm}}
+}
 {\ifcsstring{paperprintname}{double}
     {\geometry{a3paper,twoside,landscape,twocolumn,columnsep=40mm,left=40mm,right=30mm,top=25mm,bottom=25mm}}
     {\geometry{a3paper,landscape,twocolumn,columnsep=40mm,left=35mm,right=35mm,top=25mm,bottom=25mm}}
-}
-{\ifcsstring{paperprintname}{double}
-    {\geometry{a4paper,twoside,left=30mm,right=20mm,top=25mm,bottom=25mm}}
-    {\geometry{a4paper,left=25mm,right=25mm,top=25mm,bottom=25mm}}
 }
 \geometry{showframe}
 
