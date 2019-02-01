@@ -5,9 +5,13 @@
 ---------------------------------------------------------------
 
 simplexam.cls --- A simple class for chinese exam paper
+
 based on exsheets bundles
+
 Maintained by huzhenzhen
+
 E-mail: hzzmail@163.com
+
 Released under the LaTeX Project Public License v1.3c or later
 
 ---------------------------------------------------------------
@@ -103,6 +107,25 @@ Charles Bao 的 BHCexam
 	`scoretable=true`或`scoretable`，输出分数统计表
 	
 	`scoretable=false`，不输出分数统计表
+	
+	
+* `scratchpaper` 设置是否输出草稿纸
+
+	`scratchpaper=true`或`scratchpaper`，输出草稿纸
+	
+	`scratchpaper=false`，不输出草稿纸
+	
+* `sealrule` 设置是否输出密封线和密封区
+
+	`sealrule=true`或`sealrule`，输出密封线
+	
+	`sealrule=false`，不输出密封线
+	
+* `headfoot` 设置是否输出页眉页脚
+
+	`headfoot=true`或`headfoot`，输出页眉页脚
+	
+	`headfoot=false`，不输出页眉页脚
 
 ## 主要特点
 
@@ -117,12 +140,21 @@ Charles Bao 的 BHCexam
 * 自动的页眉页脚和草稿页
 * 选择题选项可以利用tasks手动给出也可以用options命令自动设置
 * 不打印答案时自动留出适当空白以便填写答案
+* 插入图表可以用浮动体或者非浮动体
+
 
 
 ## 用法
 
 * 作为文档类引入
 * 标题直接用center环境输入
+* 非浮动体图表采用insertfig和inserttab环境，带两个参数分别为题注和label，比如：
+```
+\begin{insertfig}{caption content}{label content}
+fig contents
+\begin{insertfig}
+```
+
 * 出题方法参考示例试卷
 * 其它页面可视元素按需编辑
 * 正文字体和数学字体按需设置

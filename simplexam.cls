@@ -20,6 +20,12 @@
 \xdef\papersizename{A4}
 \bool_new:N   \l__simplexam_prtanswer_bool  %判断打印答案用的boolean
 \bool_new:N   \l__simplexam_scoretab_bool  %判断打印得分表用的boolean
+\bool_new:N   \l__simplexam_scratch_bool  %判断输出草稿纸用的boolean
+\bool_new:N   \l__simplexam_sealrule_bool %判断输出密封线用的boolean
+\bool_new:N   \l__simplexam_headfoot_bool %判断输出页眉页脚用的boolean
+\bool_set_true:N \l__simplexam_scratch_bool%默认输出草稿纸
+\bool_set_true:N \l__simplexam_sealrule_bool%默认输出密封区和线
+\bool_set_true:N \l__simplexam_headfoot_bool%默认输出页眉页脚
 
 \newtoggle{auxinfoused}
 \togglefalse{auxinfoused}
@@ -46,6 +52,18 @@
                                                                          %若使用paper和papersize会报选项错误。
     sheetsize.default:n = {A4}, %默认设置值为A4,A3
     sheetsize.value_required:n = false, %可以不给出设置值
+
+    scratchpaper.bool_set:N = \l__simplexam_scratch_bool, %选项scratchpaper用来设置输出草稿纸
+    scratchpaper.default:n = true, %默认设置值为true
+    scratchpaper.value_required:n = false, %可以不给出设置值
+
+    sealrule.bool_set:N = \l__simplexam_sealrule_bool, %选项sealrule用来设置输出密封线
+    sealrule.default:n = true, %默认设置值为true
+    sealrule.value_required:n = false, %可以不给出设置值
+
+    headfoot.bool_set:N = \l__simplexam_headfoot_bool, %选项sealrule用来设置输出密封线
+    headfoot.default:n = true, %默认设置值为true
+    headfoot.value_required:n = false, %可以不给出设置值
 
   }
 
@@ -144,7 +162,9 @@
 \setfoot{}{第\thepage 页 共\totalpage 页}{}%
 \headrule%
 \footrule}%
-\pagestyle{main}
+\bool_if:NTF \l__simplexam_headfoot_bool
+{\pagestyle{main}}
+{\pagestyle{empty}}
 
 \RequirePackage{exsheets}%所有题目都用question环境，便于从题库中主动/随机选择
 \DeclareInstance{exsheets-heading}{runin-simple}{default}{%定制question的heading
@@ -720,7 +740,7 @@
 %
 %填空题答案填写命令
 %加上实际得分的处理
-%\answer[score]{<answer contents}
+%\answerpoints[score]
 \NewDocumentCommand{\answerpoints}{o}{%
     \tl_if_blank:nTF {#1}
     {\csxdef{unit\thesecunit ans\thequestion}{\csuse{unit\thesecunit qu\thequestion}}}
@@ -860,7 +880,7 @@
 }
 
 \RequirePackage{everypage}
-\newcommand{\mifengxian}{%
+\newcommand{\sealruleleft}{%
 \def\1{\\[50mm]}\def\2{\\[15mm]}%
 \begin{tikzpicture}[remember picture,overlay,very thick,font=\large]
   \path (current page.south west) +(1.5cm,1cm)  coordinate (a1);
@@ -872,7 +892,7 @@
   \draw (b1) -- (b2);
 \end{tikzpicture}}
 
-\newcommand{\mifengxianstudent}{%
+\newcommand{\sealareainfo}{%
 \def\1{\\[50mm]}\def\2{\\[15mm]}%
 \begin{tikzpicture}[remember picture,overlay,very thick,font=\large]
   \path (current page.south west) +(1.5cm,1cm)  coordinate (a1);
@@ -886,7 +906,7 @@
   \draw (b1) -- (b2);
 \end{tikzpicture}}
 
-\newcommand{\mifengxianright}{%
+\newcommand{\sealruleright}{%
 \def\1{\\[50mm]}\def\2{\\[15mm]}%
 \begin{tikzpicture}[remember picture,overlay,very thick,font=\large]
   \path (current page.south east) +(-1.5cm,1cm)  coordinate (a1);
@@ -898,27 +918,33 @@
   \draw (b1) -- (b2);
 \end{tikzpicture}}
 
-\newcommand{\caogaozhi}{%
+\newcommand{\scratchpaper}{%
 \begin{tikzpicture}[remember picture,overlay,font=\sffamily\fontsize{72pt}{72pt}\selectfont]
   \node[text=lightgray!20] at (current page.center) {草\quad 稿\quad 纸};
 \end{tikzpicture}}
 
-\AddEverypageHook{
-\ifnumequal{\value{page}}{1}{\mifengxianstudent}{
+\ExplSyntaxOn
+
+\bool_if:NT \l__simplexam_sealrule_bool
+{\AddEverypageHook{
+\ifnumequal{\value{page}}{1}{\sealareainfo}{
     \ifcsstring{paperprintname}{double}
-    {\ifnumodd{\value{page}}{\mifengxian}{\mifengxianright}}
-    {\mifengxian}}
-}
-  % 在 twocolumn 文档中，\newpage 可能是到下一栏，\clearpage 才能保证到下一页
+    {\ifnumodd{\value{page}}{\sealruleleft}{\sealruleright}}
+    {\sealruleleft}}
+}}
+
+\bool_if:NT \l__simplexam_scratch_bool {
+% 在 twocolumn 文档中，\newpage 可能是到下一栏，\clearpage 才能保证到下一页
 \AtEndDocument{
-\clearpage\pagestyle{empty}\caogaozhi\clearpage\caogaozhi\addtocounter{page}{-2}
+\clearpage\pagestyle{empty}\scratchpaper\clearpage\scratchpaper\addtocounter{page}{-2}
 }
 %\preto{\@enddocumenthook}{\clearpage\pagestyle{empty}\caogaozhi\clearpage\caogaozhi\addtocounter{page}{-2}}
+}
 
-
-\ExplSyntaxOn
-\str_new:N \l__simplexam_hanzi_str %用于输出拼音和米子格的汉字的处理
-\def\hanzimibox{\tikz{%米子格形状
+%
+%用于输出拼音和米子格的汉字的处理
+\str_new:N \l__simplexam_hanzi_str
+\def\hanzimibox{\tikz{%米字格形状
     \def\xst{0}
     \def\yst{0}
     \def\xed{1em}
