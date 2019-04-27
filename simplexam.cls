@@ -23,9 +23,17 @@
 \bool_new:N   \l__simplexam_scratch_bool  %判断输出草稿纸用的boolean
 \bool_new:N   \l__simplexam_sealrule_bool %判断输出密封线用的boolean
 \bool_new:N   \l__simplexam_headfoot_bool %判断输出页眉页脚用的boolean
-\bool_set_true:N \l__simplexam_scratch_bool%默认输出草稿纸
-\bool_set_true:N \l__simplexam_sealrule_bool%默认输出密封区和线
-\bool_set_true:N \l__simplexam_headfoot_bool%默认输出页眉页脚
+\bool_new:N   \l__simplexam_scoreshow_bool %boolean选项用来设置是否显示评分表中的分值
+\bool_set_true:N \l__simplexam_scratch_bool %默认输出草稿纸
+\bool_set_true:N \l__simplexam_sealrule_bool %默认输出密封区和线
+\bool_set_true:N \l__simplexam_headfoot_bool %默认输出页眉页脚
+\bool_set_false:N \l__simplexam_scoreshow_bool %默认不显示评分表中的分值
+
+\bool_new:N   \l__simplexam_inanswersheet_bool %判断是否在单独的答案表中的，若在那么一些命令的逻辑要做修改，比如\answerpoints就不能再执行了。
+\bool_set_false:N \l__simplexam_inanswersheet_bool %默认不在答案表中
+
+\int_new:N \l_temp_answer_int %临时变量
+\tl_new:N \l__simplexam_tempans_tl %临时变量
 
 \newtoggle{auxinfoused}
 \togglefalse{auxinfoused}
@@ -44,9 +52,13 @@
     paperprint .default:n = {double}, %默认设置值为double，single
     paperprint .value_required:n = false, %可以不给出设置值
 
-    scoretable .bool_set:N = \l__simplexam_scoretab_bool, %选项answer用来设置boolean
+    scoretable .bool_set:N = \l__simplexam_scoretab_bool, %选项用来设置boolean
     scoretable .default:n = true, %默认设置值为true
     scoretable .value_required:n = false, %可以不给出设置值
+
+    scoreshow .bool_set:N = \l__simplexam_scoreshow_bool, %boolean选项用来设置是否显示评分表中的分值
+    scoreshow .default:n = true, %默认设置值为true
+    scoreshow .value_required:n = false, %可以不给出设置值
 
     sheetsize.code:n ={\xdef\papersizename{#1}},%纸张大小，用sheet而不是paper，因为paper和papersize两个选项geometry宏包已经用了。
                                                                          %若使用paper和papersize会报选项错误。
@@ -82,28 +94,30 @@
     xcolor,
     xpinyin,
     amssymb,
-    mwe
+    mwe,
+    graphicx,
   }
 
 
 \ifcsstring{papersizename}{A4}
 {\ifcsstring{paperprintname}{double}
-    {\geometry{a4paper,twoside,left=30mm,right=20mm,top=25mm,bottom=25mm}}
-    {\geometry{a4paper,left=30mm,right=20mm,top=25mm,bottom=25mm}}
+    {\geometry{a4paper,twoside,left=30mm,right=20mm,top=20mm,bottom=15mm}}
+    {\geometry{a4paper,left=30mm,right=20mm,top=20mm,bottom=15mm}}
 }
 {\ifcsstring{paperprintname}{double}
-    {\geometry{a3paper,twoside,landscape,twocolumn,columnsep=40mm,left=40mm,right=30mm,top=25mm,bottom=25mm}}
-    {\geometry{a3paper,landscape,twocolumn,columnsep=40mm,left=35mm,right=35mm,top=25mm,bottom=25mm}}
+    {\geometry{a3paper,twoside,landscape,twocolumn,columnsep=40mm,left=40mm,right=30mm,top=20mm,bottom=15mm}}
+    {\geometry{a3paper,landscape,twocolumn,columnsep=40mm,left=35mm,right=35mm,top=20mm,bottom=15mm}}
 }
-\geometry{showframe}
+%\geometry{showframe}
 
 
 \RequirePackage[tbtags]{amsmath}
 \RequirePackage{scalerel}%缩放公式大小
 \RequirePackage{fontspec}% fontset=sourcesans,
-\RequirePackage[zihao=5]{ctex}% fontset=sourcesans,
+\RequirePackage[zihao=-4]{ctex}% fontset=sourcesans,
 \RequirePackage[math-style=ISO, bold-style=ISO]{unicode-math}
 \everymath{\displaystyle}
+
 
 
 \DeclareMathOperator{\dif}{\mathop{}\!\mathrm{d}}
@@ -124,7 +138,7 @@
 
 
 \RequirePackage[pagestyles]{titlesec}
-\titleformat{\section}{\zihao{-4}\heiti}{\chinese{section} 、}{0em}{}%
+\titleformat{\section}{\zihao{4}\heiti}{\chinese{section} 、}{0em}{}%
 [
 \bool_if:NTF \l__simplexam_scoretab_bool {%当需要打印评分表时
 \ifcsstring{unitname}{section}{%当大题以section为单位时
@@ -135,7 +149,7 @@
 %得分表可以使用手动命令完成，也可以如这里般用章节命令
 \ifcsstring{unitname}{chapter}%当以章为单位时，设置chapter格式。
 {
-    \titleformat{\chapter}{\zihao{-4}\heiti}{\chinese{chapter} 、}{0em}{}%
+    \titleformat{\chapter}{\zihao{4}\heiti}{\chinese{chapter} 、}{0em}{}%
     [
     \bool_if:NTF \l__simplexam_scoretab_bool {%当需要打印评分表时
     \ifcsstring{unitname}{chapter}{%当大题以section为单位时
@@ -151,15 +165,20 @@
 \renewcommand\headrule{\setheadrule{0.4pt}}
 \renewcommand\footrule{\setfootrule{0pt}}
 
+\def\pageheadingudf{试\hspace{4em}卷\hspace{4em}标\hspace{4em}题}
+\def\pagefootingudf{第\thepage 页 共\totalpage 页; 时间:\ \today}
+\def\pageheading#1{\def\pageheadingudf{#1}}
+\def\pagefooting#1{\def\pagefootingudf{#1}}
+
 \def\totalpage{0}
 \newpagestyle{main}{ %%内容奇数页左,偶数页右
 \sethead[]%偶数页左
-[试\hspace{4em}卷\hspace{4em}标\hspace{4em}题]%偶数页中
+[\pageheadingudf]%偶数页中
 []%偶数页右
 {}%奇数页左
-{试\hspace{4em}卷\hspace{4em}标\hspace{4em}题}%奇数页中
+{\pageheadingudf}%奇数页中
 {}%奇数页右
-\setfoot{}{第\thepage 页 共\totalpage 页}{}%
+\setfoot{}{\pagefootingudf}{}%
 \headrule%
 \footrule}%
 \bool_if:NTF \l__simplexam_headfoot_bool
@@ -169,7 +188,10 @@
 \RequirePackage{exsheets}%所有题目都用question环境，便于从题库中主动/随机选择
 \DeclareInstance{exsheets-heading}{runin-simple}{default}{%定制question的heading
     runin = true ,
-    number-pre-code ={},
+    %title-format = \rmfamily,%\large\scshape
+    number-format = \color{blue}\bfseries,%\itshape
+    %points-format = \rmfamily,%\large\bfseries
+    number-pre-code ={},%\color{blue}\itshape\rmfamily\mdseries
     number-post-code =\space,
     join ={main[r,vc]number[r,vc](0pt,0pt) ;},
     attach ={main[r,vc]points[l,vc](\linewidth,0pt)}
@@ -199,6 +221,7 @@
     counter-format=qu[1].,
     counter-within={\counterwithinunit},
     headings ={runin-simple},
+    headings-format=\normalsize,
     solution/headings=block-simple,
     solution/name={\textcolor{blue}{答:}},
 }
@@ -207,7 +230,7 @@
         solution/print=true,
     }
 }
-\SetupExSheets[points]{name=分,format=\color{blue}\bfseries}%format=\textcolor{blue}
+\SetupExSheets[points]{name=分,format=\color{blue}}%format=\textcolor{blue}\bfseries
 
 
 %增加一个新的计分系统
@@ -242,12 +265,11 @@
         \UseInstance {exsheets-heading} {block}
       }
     {#2} {#3} {#4} {#5} {#6}
-    %增加的计分系统
+    %增加的题目统计和计分系统
         \ifcsstring{unitname}{none}{\setcounter{secunit}{1}}%当unitname为none的时候把所有的题都放到第一节中
-        {\setcounter{secunit}{\value{\unitname}}}
+            {\setcounter{secunit}{\value{\unitname}}}
         \def\unitnumber{\number\numexpr\thesecunit-1}
         \setcounter{questionnew}{\thequestion}
-        %\addtocounter{questionnew}{1}%此处在question更新之前，所以加1
         \ifnum\value{questionold}<\value{questionnew}%当old大于等于new的时候说明单元变化
             \setcounter{questionold}{\thequestionnew}
         \else
@@ -258,12 +280,12 @@
             \setcounter{questionold}{\thequestionnew}
         \fi
         \ifcsundef{unit\thesecunit qu\thequestionnew}%
-        {%因为solution同样应用这个宏，也会做处理，可能会覆盖前面的定义
-        %因此当分数已经定义，那么就不再做分数处理了。
-        \fp_compare:nNnTF {#4} = {0} %当未给出分数时则使用默认的分值
-        {\csxdef{unit\thesecunit qu\thequestionnew}{\fp_use:N \simplexam_default_pts_fp}}
-        {\csxdef{unit\thesecunit qu\thequestionnew}{\fp_use:N #4}}
-        }{}
+            {%因为solution同样应用这个宏，也会做处理，可能会覆盖前面的定义
+                %因此当分数已经定义，那么就不再做分数处理了。
+                \fp_compare:nNnTF {#4} = {0} %当未给出分数时则使用默认的分值
+                {\csxdef{unit\thesecunit qu\thequestionnew}{\fp_use:N \simplexam_default_pts_fp}}
+                {\csxdef{unit\thesecunit qu\thequestionnew}{\fp_use:N #4}}
+            }{}
         %测试代码
         %numberofsec:\unitnumber : \csuse{unit\unitnumber qus} -\csuse{unit3qus}\par
         %pointofsec:\thesecunit  qu: \thequestionnew : \csuse{unit\thesecunit qu\thequestionnew}
@@ -524,23 +546,24 @@
 
             {
                 %loopinsec: \int_use:N \l_countTMPA_int qu: \int_use:N \l_countTMPB_int points:\csuse{unit\l_countTMPA_int qu\l_countTMPB_int}\par
-                \ifcsundef{unit\int_use:N \l_countTMPA_int qu\int_use:N \l_countTMPB_int}%如果没有给出答案分数，以题目的分数作为后备
-                {undefine: unit\int_use:N \l_countTMPA_int qu\int_use:N \l_countTMPB_int
-                \csxdef{unit\int_use:N \l_countTMPA_int qu\int_use:N \l_countTMPB_int}{\fp_use:N \simplexam_default_pts_fp}}
-                {}
+                \ifcsundef{unit\int_use:N \l_countTMPA_int qu\int_use:N \l_countTMPB_int}%如果没有给出题目分数，以题目的默认的分数作为后备
+                    {Warning:~undefined~points~for~QUESTION:~unit\int_use:N \l_countTMPA_int qu\int_use:N \l_countTMPB_int \par
+                    \csxdef{unit\int_use:N \l_countTMPA_int qu\int_use:N \l_countTMPB_int}{\fp_use:N \simplexam_default_pts_fp}}
+                    {}
 
                 \iow_now:cx {@auxout}{%记录当前题目的分数
-                \string\pointstoparse{\int_use:N \l_countTMPA_int}{\int_use:N \l_countTMPB_int}{\csuse{unit\int_use:N \l_countTMPA_int qu\int_use:N \l_countTMPB_int}}%
-                }%
+                    \string\pointstoparse{\int_use:N \l_countTMPA_int}{\int_use:N \l_countTMPB_int}{\csuse{unit\int_use:N \l_countTMPA_int qu\int_use:N \l_countTMPB_int}}%
+                    }%
 
                 \ifcsundef{unit\int_use:N \l_countTMPA_int ans\int_use:N \l_countTMPB_int}%如果没有给出答案分数，以题目的分数作为后备
-                {undefine: unit\int_use:N \l_countTMPA_int ans\int_use:N \l_countTMPB_int
-                \csxdef{unit\int_use:N \l_countTMPA_int ans\int_use:N \l_countTMPB_int}{\csuse{unit\int_use:N \l_countTMPA_int qu\int_use:N \l_countTMPB_int}}}
-                {}
+                    {Warning:~undefined~points~for~ANSWER:~ unit\int_use:N \l_countTMPA_int ans\int_use:N \l_countTMPB_int \par
+                    \csxdef{unit\int_use:N \l_countTMPA_int ans\int_use:N \l_countTMPB_int}{\csuse{unit\int_use:N \l_countTMPA_int qu\int_use:N \l_countTMPB_int}}}
+                    {}
 
                 \iow_now:cx {@auxout}{%记录当前题目的实际得分
-                \string\ansptstoparse{\int_use:N \l_countTMPA_int}{\int_use:N \l_countTMPB_int}{\csuse{unit\int_use:N \l_countTMPA_int ans\int_use:N \l_countTMPB_int}}%
-                }%
+                    \string\ansptstoparse{\int_use:N \l_countTMPA_int}{\int_use:N \l_countTMPB_int}{\csuse{unit\int_use:N \l_countTMPA_int ans\int_use:N \l_countTMPB_int}}%
+                    }%
+                %unit: \int_use:N \l_countTMPA_int qu: \int_use:N \l_countTMPB_int :pts: \csuse{unit\int_use:N \l_countTMPA_int ans\int_use:N \l_countTMPB_int} \par
 
                 \fp_add:Nn \l_pointTMPB_fp {\csuse{unit\int_use:N \l_countTMPA_int qu\int_use:N \l_countTMPB_int}}
 
@@ -585,6 +608,7 @@
 %
 %
 %重定义__exsheets_solution_internal:环境，用于当不给出答案时输出空白
+%这里的空间增加时调出来的。
 \newlength{\heightofsolution}
 \RenewEnviron { __exsheets_solution_internal: }
   {
@@ -593,9 +617,13 @@
       { \bool_if:NTF \l__exsheets_solutions_print_bool
         {\__exsheets_save_solution:V \BODY}
         {\settoheight{\heightofsolution}{\parbox{\linewidth}{\BODY}}
-        \addtolength{\heightofsolution}{3.92\baselineskip}%这里的空间增加时调出来的。
+        \addtolength{\heightofsolution}{3.92\baselineskip}
         \examspace{\heightofsolution}
         }
+        %\csxdef{savedansunit\thesecunit qu\thequestion}{\BODY} %当有includegrphics时有问题
+        %\csgdef{savedansunit\thesecunit qu\thequestion}{\BODY} %结果输出有问题
+        %\protected@csxdef{savedansunit\thesecunit qu\thequestion}{\BODY} %没有问题
+        \global\cslet{savedansunit\thesecunit qu\thequestion}{\BODY} %没有问题
       }
   }
 
@@ -627,26 +655,46 @@
 
 
 %输出<#1>大题中各小题的分值，用于tabular环境中
- \def\ForEachquinunitpoints#1{
-        \int_gset:Nn \l_countTMPA_int {1}
-        \int_gset:Nn \l_countTMPB_int {\questionsunit{#1}}
-        \int_while_do:nNnn {\l_countTMPA_int } <{\l_countTMPB_int + 1}
-            {
-                \pointsques{#1}{\int_use:N \l_countTMPA_int}
-                \int_gincr:N  \l_countTMPA_int &
-            }
- }
+\def\ForEachquinunitpoints#1{
+    \int_gset:Nn \l_countTMPA_int {1}
+    \int_gset:Nn \l_countTMPB_int {\questionsunit{#1}}
+    \int_while_do:nNnn {\l_countTMPA_int } <{\l_countTMPB_int + 1}
+        {
+            \pointsques{#1}{\int_use:N \l_countTMPA_int}
+            \int_gincr:N  \l_countTMPA_int &
+        }
+}
+
+%输出<#1>大题中各小题的空分值，用于tabular环境中
+\def\ForEachquinunitNOpts#1{
+    \int_gset:Nn \l_countTMPA_int {1}
+    \int_gset:Nn \l_countTMPB_int {\questionsunit{#1}}
+    \int_while_do:nNnn {\l_countTMPA_int } <{\l_countTMPB_int + 1}
+        {
+            \int_gincr:N  \l_countTMPA_int &
+        }
+}
 
 %输出各大题(节)的分值，用于tabular环境中
- \def\ForEachunitpoints{
-        \int_gset:Nn \l_countTMPA_int {1}
-        \int_gset:Nn \l_countTMPB_int {\questionsunitall}
-        \int_while_do:nNnn {\l_countTMPA_int } <{\l_countTMPB_int + 1}
-            {
-               \pointsunit{\int_use:N \l_countTMPA_int}
-                \int_gincr:N  \l_countTMPA_int &
-            }
- }
+\def\ForEachunitpoints{
+    \int_gset:Nn \l_countTMPA_int {1}
+    \int_gset:Nn \l_countTMPB_int {\questionsunitall}
+    \int_while_do:nNnn {\l_countTMPA_int } <{\l_countTMPB_int + 1}
+        {
+           \pointsunit{\int_use:N \l_countTMPA_int}
+            \int_gincr:N  \l_countTMPA_int &
+        }
+}
+
+%输出各大题(节)的空值，用于tabular环境中
+\def\ForEachunitNOpts{
+    \int_gset:Nn \l_countTMPA_int {1}
+    \int_gset:Nn \l_countTMPB_int {\questionsunitall}
+    \int_while_do:nNnn {\l_countTMPA_int } <{\l_countTMPB_int + 1}
+        {
+            \int_gincr:N  \l_countTMPA_int &
+        }
+}
 
 %输出<#1>大题中各小题的得分，用于tabular环境中
  \def\ForEachquinunitanspts#1{
@@ -675,27 +723,108 @@
 \RequirePackage{multirow,array}
 \newcounter{columntmp}
 
-\def\assesstaball{
-\noindent\begingroup\heiti\large
+%
+%用于输出全部大题的得分表
+%
+\def\assesstaball{%
+\iftoggle{auxinfoused}{%
+\noindent\begingroup\kaishu\large
 \setcounter{columntmp}{\questionsunitall}
 \addtocounter{columntmp}{2}
-\begin{tabular}{|l|*{\questionsunitall}{>{\centering}p{0.5cm}|}c|>{\centering\arraybackslash}p{1.5cm}|}
-\hline
-大题 & \ForEachunit  总计 & 阅卷人\\ \hline
-分值 & \ForEachunitpoints \pointsall & \multirow {2}{1cm}{}\\ \cline{1-\thecolumntmp}
-得分 & \ForEachunitanspts \bool_if:NT \l__simplexam_prtanswer_bool{\ansptsall} & \\ \hline
-\end{tabular}\endgroup}
+\bool_if:NTF \l__simplexam_scoreshow_bool
+    {\begin{tabular}{|l|*{\questionsunitall}{>{\centering}p{0.8cm}|}c|>{\centering\arraybackslash}p{2cm}|}
+    \hline
+    大题 & \ForEachunit  总计 & 阅卷人\\ \hline
+    分值 & \ForEachunitpoints \pointsall & \multirow {2}{2cm}{}\\ \cline{1-\thecolumntmp}
+    得分 & \ForEachunitanspts \bool_if:NT \l__simplexam_prtanswer_bool{\ansptsall} & \\ \hline
+    \end{tabular}}
+    {\begin{tabular}{|l|*{\questionsunitall}{>{\centering}p{0.8cm}|}c|>{\centering\arraybackslash}p{2cm}|}
+    \hline
+    大题 & \ForEachunit  总计 & 阅卷人\\ \hline
+    分值 & \ForEachunitpoints \pointsall  & \multirow {2}{2cm}{}\\ \cline{1-\thecolumntmp}
+    得分 & \ForEachunitNOpts  & \\ \hline
+    \end{tabular}}
+\endgroup
+}{}}
 
-\def\assesstabunit#1{
+
+
+%
+%用于输出各大题的小题得分表
+%<#1>是大题的序号
+\def\assesstabunit#1{%
+\kaishu%
 \setcounter{columntmp}{\questionsunit{#1}}
 \addtocounter{columntmp}{2}
-\begin{tabular}{|l|*{\questionsunit{#1}}{>{\centering}p{0.5cm}|}c|>{\centering\arraybackslash}p{1.5cm}|}
-\hline
-小题 & \ForEachquinunit{#1}  总计 & 阅卷人\\ \hline
-分值 & \ForEachquinunitpoints{#1} \pointsunit{#1} & \multirow {2}{1cm}{}\\ \cline{1-\thecolumntmp}
-得分 & \ForEachquinunitanspts{#1} \bool_if:NT \l__simplexam_prtanswer_bool{\ansptsunit{#1}} & \\ \hline
-\end{tabular}}
+\bool_if:NTF \l__simplexam_scoreshow_bool
+    {\begin{tabular}{|l|*{\questionsunit{#1}}{>{\centering}p{0.5cm}|}c|>{\centering\arraybackslash}p{2cm}|}
+    \hline
+    小题 & \ForEachquinunit{#1}  总计 & 阅卷人\\ \hline
+    分值 & \ForEachquinunitpoints{#1} \pointsunit{#1} & \multirow {2}{1cm}{}\\ \cline{1-\thecolumntmp}
+    得分 & \ForEachquinunitanspts{#1} \bool_if:NT \l__simplexam_prtanswer_bool{\ansptsunit{#1}} & \\ \hline
+    \end{tabular}}
+    {\begin{tabular}{|l|*{\questionsunit{#1}}{>{\centering}p{0.5cm}|}c|>{\centering\arraybackslash}p{2cm}|}
+    \hline
+    小题 & \ForEachquinunit{#1}  总计 & 阅卷人\\ \hline
+    分值 & \ForEachquinunitpoints{#1} \pointsunit{#1}  & \multirow {2}{1cm}{}\\ \cline{1-\thecolumntmp}
+    得分 & \ForEachquinunitNOpts{#1}  & \\ \hline
+    \end{tabular}}
+}
 
+%
+%用于输出各大题的答案，以表格的形式
+%<#1>是表格的答案列的宽度，<#2>大题的序号
+\newcommand{\answerstabunit}[2][\@empty]{
+\bool_set_true:N \l__simplexam_inanswersheet_bool %给一些命令比如\answerpoints做标记，避免在给出单独的答案表时重做
+\ifcsundef{unit#2qus}{\csxdef{unit#2qus}{\thequestionold}}{}
+\renewcommand{\baselinestretch}{2.0}
+\noindent \medskip\textbf{\heiti 第#2大题答案:}\\\medskip
+\ifx#1\@empty
+\begin{tabular}{|l|c|}
+\else
+\xdef\tabsetcolumn{#1}
+\begin{tabular}{|l|m{\tabsetcolumn}|}
+\fi
+\hline
+小题 & 答案  \\ \hline
+\ForEachquinunitanswers{#2}
+\end{tabular}\par
+\bool_set_false:N \l__simplexam_inanswersheet_bool
+}
+
+%输出<#1>大题中各小题的答案，用于tabular环境中
+\def\ForEachquinunitanswers#1{
+    \int_gset:Nn \l_countTMPA_int {1}
+    \int_gset:Nn \l_countTMPB_int {\csuse{unit#1qus}}
+    \int_while_do:nNnn {\l_countTMPA_int } <{\l_countTMPB_int + 1}
+        {
+\int_use:N \l_countTMPA_int & \csuse{savedansunit#1qu\int_use:N \l_countTMPA_int} \int_gincr:N  \l_countTMPA_int \\ \hline
+        }
+}
+
+%
+%用于输出各大题的答案，以正文的形式
+%<#1>是表格的答案列的宽度，<#2>大题的序号
+\newcommand{\answersinfounit}[2][\@empty]{%
+\bool_set_true:N \l__simplexam_inanswersheet_bool %给一些命令比如\answerpoints做标记，避免在给出单独的答案表时重做
+\ifcsundef{unit#2qus}{\csxdef{unit#2qus}{\thequestionold}}{}
+\renewcommand{\baselinestretch}{2.0}
+\noindent\textbf{\heiti 第#2大题答案:}\\ %\medskip
+\ifx#1\@empty
+\xdef\tasksetcolumn{3cm}
+\else
+\xdef\tasksetcolumn{#1}
+\fi
+\int_gset:Nn \l_countTMPA_int {1}
+\int_gset:Nn \l_countTMPB_int {\csuse{unit#2qus}}%\questionsunit{#2}
+\int_while_do:nNnn {\l_countTMPA_int } <{\l_countTMPB_int + 1}
+    {\parbox{\tasksetcolumn}{%
+    \int_use:N \l_countTMPA_int :\ \csuse{savedansunit#2qu\int_use:N \l_countTMPA_int}\hfill}\space
+    \int_gincr:N  \l_countTMPA_int
+    }
+\par
+\bool_set_false:N \l__simplexam_inanswersheet_bool
+}
 
 
 \RequirePackage{pifont}
@@ -708,8 +837,8 @@
 \makebox{(\space\makebox[3em]{%
 \bool_if:nTF {\l__simplexam_prtanswer_bool}%
     {\color{blue}\str_case:nnTF {#2}{%
-        {right} {\ding{52}}%
-        {wrong} {\ding{56}}%
+        {right} {\char"221A}%\ding{52}
+        {wrong} {\char"00D7}%\ding{56}
         }{}{#2}%
     }{}%
     }\space)\par}%
@@ -720,6 +849,10 @@
         {\csxdef{unit\thesecunit ans\thequestion}{\csuse{unit\thesecunit qu\thequestion}}}
         {\csxdef{unit\thesecunit ans\thequestion}{#1}}
     }
+\csgdef{savedansunit\thesecunit qu\thequestion}{\str_case:nnTF {#2}{%
+        {right} {\char"221A}%\ding{52}
+        {wrong} {\char"00D7}%\ding{56}
+        }{}{#2}}%将信息记录到一个命令中
 }
 
 %
@@ -735,6 +868,13 @@
         {\csxdef{unit\thesecunit ans\thequestion}{\csuse{unit\thesecunit qu\thequestion}}}
         {\csxdef{unit\thesecunit ans\thequestion}{#1}}
     }
+\ifcsundef{savedansunit\thesecunit qu\thequestion}{%
+    \tl_gset:Nn \l__simplexam_tempans_tl {#2}
+    \csgdef{savedansunit\thesecunit qu\thequestion}{#2}%将信息记录到一个命令中
+    }{
+    \tl_gput_right:Nn \l__simplexam_tempans_tl {；#2}
+    \csxdef{savedansunit\thesecunit qu\thequestion}{\tl_use:N \l__simplexam_tempans_tl}%
+    }%
 }
 
 %
@@ -742,12 +882,17 @@
 %加上实际得分的处理
 %\answerpoints[score]
 \NewDocumentCommand{\answerpoints}{o}{%
-    \tl_if_blank:nTF {#1}
-    {\csxdef{unit\thesecunit ans\thequestion}{\csuse{unit\thesecunit qu\thequestion}}}
+    \bool_if:NTF \l__simplexam_inanswersheet_bool
+    {}
     {
-        \IfNoValueTF {#1}
+        \tl_if_blank:nTF {#1}
         {\csxdef{unit\thesecunit ans\thequestion}{\csuse{unit\thesecunit qu\thequestion}}}
-        {\csxdef{unit\thesecunit ans\thequestion}{#1}}
+        {
+            \IfNoValueTF {#1}
+            {\csxdef{unit\thesecunit ans\thequestion}{\csuse{unit\thesecunit qu\thequestion}}}
+            {\csxdef{unit\thesecunit ans\thequestion}{#1}}
+            %unit:\thesecunit :qu \thequestion :pts: \csuse{unit\thesecunit ans\thequestion}
+        }
     }
 }
 
@@ -795,7 +940,7 @@
 \if_dim:w \the\lenoftaskold > 0.48\linewidth
 \tl_set:Nn \l__simplexam_tempb_tl {1}
 \else:
-\if_dim:w \the\lenoftaskold > 0.23\linewidth
+\if_dim:w \the\lenoftaskold > 0.21\linewidth
 \tl_set:Nn \l__simplexam_tempb_tl {2}
 \fi:
 \fi:
@@ -852,6 +997,7 @@
 \ExplSyntaxOff
 
 \setmainfont{CMU Serif}%带空格的字体设置不能放在latex3的环境中
+\setCJKmainfont{SourceHanSerifSC-Regular.otf}
 
 %tikz的usetikzlibrary不能放在latex3语法环境中，
 %或者采用打补丁的方法，补丁后则可以放置，详见tex.se
@@ -862,6 +1008,13 @@
     milines/.style={very thin,dash pattern=on 0.1em off 0.1em, blue!50},
     mibox/.style={thin},
 }
+
+\def\pagestudentudf{学院:\underline{\hspace{5em}}班级:\underline{\hspace{5em}}
+  姓名:\underline{\hspace{5em}}学号:\underline{\hspace{5em}}}
+\def\pagesealingudf{学\\[1em]生\\[1em]答\\[1em]卷\\[1em]不\\[1em]要\\[1em]超\\[1em]过\\[1em]此\\[1em]线}
+\def\pagestudent#1{\def\pagestudentudf{#1}}
+\def\pagesealing#1{\def\pagesealingudf{#1}}
+
 \newcommand{\drawcomposition}[3][0.8]{
     \begingroup
     \centering
@@ -888,7 +1041,7 @@
   \path (current page.south west) +(2.5cm,1cm)  coordinate (b1);
   \path (current page.north west) +(2.5cm,-1cm) coordinate (b2);
   \draw[dashed] (a1) -- node[left=1mm,text width=1em]{装\1订\1线}
-     node[right=1mm,text width=1em]{学\2生\2答\2卷\2不\2要\2超\2过\2此\2线} (a2);
+     node[right=1mm,text width=1em]{\pagesealingudf} (a2);
   \draw (b1) -- (b2);
 \end{tikzpicture}}
 
@@ -900,9 +1053,8 @@
   \path (current page.south west) +(2.5cm,1cm)  coordinate (b1);
   \path (current page.north west) +(2.5cm,-1cm) coordinate (b2);
   \draw[dashed] (a1) -- node[left=1mm,text width=1em]{
-  \rotatebox{90}{\parbox{15cm}{学院:\underline{\hspace{6em}}班级:\underline{\hspace{6em}}
-  姓名:\underline{\hspace{6em}}学号:\underline{\hspace{6em}}}} }
-     node[right=1mm,text width=1em]{学\2生\2答\2卷\2不\2要\2超\2过\2此\2线} (a2);
+  \rotatebox{90}{\parbox{34em}{\pagestudentudf}}}%
+     node[right=1mm,text width=1em]{\pagesealingudf} (a2);
   \draw (b1) -- (b2);
 \end{tikzpicture}}
 
@@ -914,7 +1066,7 @@
   \path (current page.south east) +(-2.5cm,1cm)  coordinate (b1);
   \path (current page.north east) +(-2.5cm,-1cm) coordinate (b2);
   \draw[dashed] (a1) -- node[right=1mm,text width=1em]{装\1订\1线}
-     node[left=1mm,text width=1em]{学\2生\2答\2卷\2不\2要\2超\2过\2此\2线} (a2);
+     node[left=1mm,text width=1em]{\pagesealingudf} (a2);
   \draw (b1) -- (b2);
 \end{tikzpicture}}
 
@@ -967,6 +1119,7 @@
 {
     \CJKglue\rlap{\lower 0.18em \hbox{\hanzimibox}}#1
 }
+
 \cs_new:Npn \simplexam_boxadd_hanzihide:N #1%覆盖当前汉字再加上米字格
 {
     #1\llap{\lower 0.18em \hbox{\hanzibox}}\llap{\lower 0.18em \hbox{\hanzimibox}}\CJKglue
@@ -982,19 +1135,54 @@
     \str_set:Nn \l__simplexam_hanzi_str {#1}
     \str_map_function:NN \l__simplexam_hanzi_str \simplexam_boxadd_hanzihide:N
 }
-\NewDocumentCommand{\answerpinyin}{m}{
+
+\NewDocumentCommand{\answerpinyinbox}{m}{
 \begingroup
 %\color{blue}
     \bool_if:NTF \l__simplexam_prtanswer_bool
         {\xpinyin*{\simplexam_map_boxadd_hanzi:N {#1}}}
-        {\simplexam_map_boxadd_hanzi:N {#1}}\endgroup
+        {\simplexam_map_boxadd_hanzi:N {#1}}
+\ifcsundef{savedansunit\thesecunit qu\thequestion}{%
+    \tl_gset:Nn \l__simplexam_tempans_tl {#1}
+    \csgdef{savedansunit\thesecunit qu\thequestion}{\xpinyin*{#1}}%将信息记录到一个命令中
+    }{
+    \tl_gput_right:Nn \l__simplexam_tempans_tl {；#1}
+    \csxdef{savedansunit\thesecunit qu\thequestion}{\xpinyin*{\tl_use:N \l__simplexam_tempans_tl}}%
+    }%
+\endgroup
 }
+
+\NewDocumentCommand{\answerpinyin}{m}{
+\begingroup
+%\color{blue}
+    \bool_if:NTF \l__simplexam_prtanswer_bool
+        {\xpinyin*{#1}}
+        {\simplexam_map_boxadd_hanzi:N {#1}}
+\ifcsundef{savedansunit\thesecunit qu\thequestion}{%
+    \tl_gset:Nn \l__simplexam_tempans_tl {#1}
+    \csgdef{savedansunit\thesecunit qu\thequestion}{\xpinyin*{#1}}%将信息记录到一个命令中
+    }{
+    \tl_gput_right:Nn \l__simplexam_tempans_tl {；#1}
+    \csxdef{savedansunit\thesecunit qu\thequestion}{\xpinyin*{\tl_use:N \l__simplexam_tempans_tl}}%
+    }%
+\endgroup
+}
+
+
 \NewDocumentCommand{\answerhanzi}{m}{
 \begingroup
 %\color{blue}
     \bool_if:NTF \l__simplexam_prtanswer_bool
         {\xpinyin*{\simplexam_map_boxadd_hanzi:N {#1}}}
-        {\xpinyin*{\simplexam_map_boxadd_hanzihide:N {#1}}}\endgroup
+        {\xpinyin*{\simplexam_map_boxadd_hanzihide:N {#1}}}
+\ifcsundef{savedansunit\thesecunit qu\thequestion}{%
+    \tl_gset:Nn \l__simplexam_tempans_tl {#1}
+    \csgdef{savedansunit\thesecunit qu\thequestion}{#1}%将信息记录到一个命令中
+    }{
+    \tl_gput_right:Nn \l__simplexam_tempans_tl {；#1}
+    \csxdef{savedansunit\thesecunit qu\thequestion}{\tl_use:N \l__simplexam_tempans_tl}%
+    }%
+\endgroup
 }
 
 \ExplSyntaxOff
