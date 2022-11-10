@@ -12,7 +12,7 @@
 
 \NeedsTeXFormat{LaTeX2e}
 \RequirePackage{expl3}
-\ProvidesExplClass {simplexam} {2018/03/11} {v1.0} {a simple exam}%同时开启latex3语法
+\ProvidesExplClass {simplexam} {2022/11/10} {v1.0c} {a simple exam}%同时开启latex3语法
 \RequirePackage{ xparse,xtemplate,l3keys2e,etoolbox}
 
 \xdef\unitname{section}
@@ -898,12 +898,15 @@
 
 \RequirePackage{tasks}%选择题的选项，利用tasks环境
 \settasks{
-  counter-format={tsk[A].},
-  label-offset={0.4em},
+  %counter-format={tsk[A].}, %tasks v1.0 版本已经弃用，改用下面的label的形式。
+  %item-indent={1pt}, %弃用counter-format indent的机制也变为list的机制所以设置该值时要考虑label-width和label-offset
+  label= \alph*.,
   label-align=left,
-  label-width = 1.3em,
+  label-width = {1em},
+  label-offset={0.4em},
+  %%注意这里indent做了更多的缩进使其与题目内容对齐，若要让标签与题目数字对齐则修改为1.4em即可
+  item-indent={2.75em},
   column-sep={2pt},
-  item-indent={1pt},
   before-skip={-0.7em},
   after-skip={-0.7em},
   %after-item-skip = 1ex plus 1ex minus 1ex %  default skip

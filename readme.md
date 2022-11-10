@@ -1,4 +1,4 @@
-<b>Date of last change: 2019-04-18 to version v1.0b</b>
+<b>Date of last change: 2022-11-10 to version v1.0c</b>
 
 # 一个简单试卷文档类 simplexam
 
@@ -261,3 +261,20 @@ Charles Bao 的 BHCexam、
 * 2018-12-01 to version v1.0
 * 2019-01-25 to version v1.0a
 * 2019-04-18 to version v1.0b 完善了答案页的输出
+* 2022-11-10 to version v1.0c 修复tasks接口改变后带来的选项标签错误问题
+	- 修改为如下
+	```
+	\settasks{
+	  label= \alph*.,
+	  label-align=left,
+	  label-width = {1em},
+	  label-offset={0.4em},
+	  item-indent={2.75em}, %注意这里做了更多的缩进使其与题目内容对齐，若要让标签与题目数字对齐则修改为1.4em即可
+	  column-sep={2pt},
+	  before-skip={-0.7em},
+	  after-skip={-0.7em},
+	  after-item-skip = -2pt plus 2pt minus 2pt
+	}
+	```
+
+
