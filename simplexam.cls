@@ -209,6 +209,37 @@
     attach = {main[l,vc]title[l,vc](0pt,0pt)},
 }
 
+
+% 类似于question，solution的标题行也是利用coffin将如下
+% ‘main’, ‘title’, ‘subtitle’,‘number’ and ‘points’ 5个内容连接起来。
+% 主要的选项是runin，inline这两者为true，那么标题行不是单独成一行。
+% main实际是标题行本身，如果runin或inline选项为false，那么这就是一行构成的coffin
+% 若runin或inline选项为false则似乎是宽度为0的内容(这个具体没有查实现)。
+% join和attach是定义标题的连接和定位。
+% coffin如何连接参考xcoffins文档
+% coffin的[]中的参数指定对齐位置点，()中的参数指定第二个coffin相对于第一个coffin的位移
+% 比如：main[r,vc]title[r,vc](0pt,0pt)表示main的r,vc和title的r,vc对齐，
+% (0pt,0pt)表示对齐即可，无需位移。
+% 至于join和attach的意义，exsheet文档其实没有明确的说明
+% 但从内部代码看代表xcoffins中的JoinCoffins和AttachCoffin
+% 两者对齐方式是相同的，但连接形式不同，前者是将后者包含进去构成一个边界包含两者新的coffin
+% 而后者则则是不包含，因此后续连接中对齐的将是第二个coffin。
+\DeclareInstance{exsheets-heading}{runin-solution}{default}{
+    runin = true ,
+    %根据上面的理解这里就清楚了
+    %将main的右中和title的左中连接起来，通常构成包含两者的coffin
+    %coffin还是在原来的位置上，即在行首
+    join ={main[r,vc]title[l,vc](0pt,0pt)}
+}
+
+\DeclareInstance{exsheets-heading}{margin-solution}{default}{
+     runin = true ,
+     %将main的左中和title的右中连接起来，仍然是两个coffin
+     %其中main coffin在行首，所以title coffin在其左侧
+     %所以title会跑到页边中
+     attach ={main[l,vc]title[r,vc](0pt,0pt)}
+}
+
 %划分单元处理
 \ifcsstring{unitname}{none}
 {\xdef\counterwithinunit{}}
@@ -222,7 +253,7 @@
     counter-within={\counterwithinunit},
     headings ={runin-simple},
     headings-format=\normalsize,
-    solution/headings=block-simple,
+    solution/headings={runin-solution},
     solution/name={\textcolor{blue}{答:}},
 }
 \bool_if:NT \l__simplexam_prtanswer_bool {

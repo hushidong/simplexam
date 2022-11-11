@@ -261,8 +261,8 @@ Charles Bao 的 BHCexam、
 * 2018-12-01 to version v1.0
 * 2019-01-25 to version v1.0a
 * 2019-04-18 to version v1.0b 完善了答案页的输出
-* 2022-11-10 to version v1.0c 修复tasks接口改变后带来的选项标签错误问题
-	- 修改为如下
+* 2022-11-10 to version v1.0c 修复tasks接口改变后带来的选项标签错误等问题
+	- task标签修改为如下
 	```
 	\settasks{
 	  label= \alph*.,
@@ -276,5 +276,17 @@ Charles Bao 的 BHCexam、
 	  after-item-skip = -2pt plus 2pt minus 2pt
 	}
 	```
+	- solution的解答增加了两个标签形式：runin-solution和margin-solution，用户可以根据需求设置：
+	```
+	\SetupExSheets{
+    counter-format=qu[1].,
+    counter-within={\counterwithinunit},
+    headings ={runin-simple},
+    headings-format=\normalsize,
+    solution/headings={runin-solution}, %根据需求设置“答”的标签样式
+    solution/name={\textcolor{blue}{答:}},
+	}
+	```
+	
 
 
